@@ -135,3 +135,57 @@ average_age, female_class_count = map_reduce_with_pandas(input_file)
 print(f"Average age of males who died: {average_age:.2f}") 
 print("Number of deceased females in each class:") 
 print(female_class_count)
+
+
+####################
+
+
+from collections import defaultdict
+
+# Read and parse the file
+def read_scores_from_file(file_path):
+    student_scores = []
+    with open(file_path, 'r') as file:
+        for line in file:
+            parts = line.strip().split()
+            if len(parts) == 2:
+                name, score = parts[0], int(parts[1])
+                student_scores.append((name, score))
+    return student_scores
+
+# Map function
+def map_function(student_scores):
+    grouped_scores = defaultdict(list)
+    for name, score in student_scores:
+        grouped_scores[name].append(score)
+    return grouped_scores
+
+# Reduce function
+def reduce_function(grouped_scores):
+    grades = {}
+    for name, scores in grouped_scores.items():
+        avg = sum(scores) / len(scores)
+        if avg > 80:
+            grade = 'A'
+        elif avg > 60:
+            grade = 'B'
+        elif avg > 40:
+            grade = 'C'
+        else:
+            grade = 'D'
+        grades[name] = grade
+    return grades
+
+# Main map-reduce function
+def map_reduce(file_path):
+    student_scores = read_scores_from_file(file_path)
+    mapped_data = map_function(student_scores)
+    grades = reduce_function(mapped_data)
+    return grades
+
+# Run the program
+file_path = 'scores.txt'  # Replace with your actual file path
+grades = map_reduce(file_path)
+
+for name, grade in grades.items():
+    print(f"{name} has been assigned grade {grade}")
